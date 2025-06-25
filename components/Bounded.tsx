@@ -8,7 +8,7 @@ interface BoundedProps {
 
 const Bounded = ({ children, className }: BoundedProps) => {
   return (
-    <section className={clsx("container mx-auto px-4 2xl:px-0", className)}>
+    <section className={clsx("container mx-auto px-4 2xl:px-0 py-12", className)}>
       {children}
     </section>
   );
