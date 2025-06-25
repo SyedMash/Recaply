@@ -61,3 +61,17 @@ export const checkSummaryPermission = async () => {
     return { success: false, message: "You have reached the limit" };
   }
 };
+
+export const saveAudio = async (file: File) => {
+  const supabase = await supabaseClient;
+  const { data, error } = await supabase.storage
+    .from("audiofiles")
+    .upload(file.name, file);
+
+  if (error) throw new Error(error.message);
+  const { data: urlData } = supabase.storage
+    .from("audiofiles")
+    .getPublicUrl(data?.path);
+
+  return urlData.publicUrl;
+};

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { GoUpload } from "react-icons/go";
 import { Button } from "@/components/ui/button";
 import { SummaryData } from "@/type";
-import { storeSummary } from "@/lib/actions/summary.action";
+import { saveAudio, storeSummary } from "@/lib/actions/summary.action";
 import { useRouter } from "next/navigation";
 
 interface UploadFormProps {
@@ -25,21 +25,19 @@ const UploadForm = ({ isAllowed, message }: UploadFormProps) => {
     formData.append("file", file);
 
     try {
-      const res = await fetch(
-        "https://ai-podcast-fastapi-backend.vercel.app",
-        {
-          method: "POST",
-          body: formData,
+      const audioUrl = await saveAudio(file);
+      console.log(audioUrl);
+
+      const response = await fetch("http://127.0.0.1:8000/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
-
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`Server Error: ${res.status} - ${errText}`);
-      }
-      const data: SummaryData = await res.json();
-      console.log("Received from API:", data);
-
+        body: JSON.stringify({
+          audio_url: audioUrl,
+        }),
+      });
+      const data: SummaryData = await response.json();
       const storedData = await storeSummary(data);
       if (storedData[0].id) {
         router.push(`/summary/${storedData[0].id}`);
