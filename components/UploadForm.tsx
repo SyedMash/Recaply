@@ -26,7 +26,7 @@ const UploadForm = ({ isAllowed, message }: UploadFormProps) => {
 
     try {
       const res = await fetch(
-        "https://ai-podcast-fastapi-backend.vercel.app/transcribe",
+        "https://ai-podcast-fastapi-backend.vercel.app",
         {
           method: "POST",
           body: formData,
