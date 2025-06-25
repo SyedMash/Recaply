@@ -28,15 +28,18 @@ const UploadForm = ({ isAllowed, message }: UploadFormProps) => {
       const audioUrl = await saveAudio(file);
       console.log(audioUrl);
 
-      const response = await fetch("http://127.0.0.1:8000/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        "https://ai-podcast-fastapi-backend.vercel.app/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            audio_url: audioUrl,
+          }),
         },
-        body: JSON.stringify({
-          audio_url: audioUrl,
-        }),
-      });
+      );
       const data: SummaryData = await response.json();
       const storedData = await storeSummary(data);
       if (storedData[0].id) {
