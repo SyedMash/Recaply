@@ -25,10 +25,13 @@ const UploadForm = ({ isAllowed, message }: UploadFormProps) => {
     formData.append("file", file);
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/transcribe", {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch(
+        "https://ai-podcast-fastapi-backend.vercel.app/transcribe",
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
 
       if (!res.ok) {
         const errText = await res.text();
