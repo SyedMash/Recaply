@@ -2,6 +2,7 @@ import React from "react";
 import { navItems } from "@/constants";
 import Link from "next/link";
 import { ModeToggle } from "@/components/ToggleTheme";
+import { UserButton } from "@clerk/nextjs";
 
 const Docker = () => {
   return (
@@ -24,6 +25,7 @@ const Docker = () => {
           );
         })}
         <ModeToggle />
+        <UserButton />
       </div>
     </div>
   );
