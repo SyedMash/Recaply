@@ -10,6 +10,7 @@ import {
 } from "@/lib/actions/summary.action";
 import { useRouter } from "next/navigation";
 import { supabaseClient } from "@/lib/supabase";
+import { useAuth } from "@clerk/nextjs";
 
 interface UploadFormProps {
   isAllowed: boolean;
@@ -29,15 +30,18 @@ const UploadForm = ({ isAllowed, message }: UploadFormProps) => {
       const supabase = await supabaseClient;
       const { data: audioData, error } = await supabase.storage
         .from("audiofiles")
-        .upload(file.name, file);
+        .upload(file.name, file, {
+          upsert: true,
+        });
       if (error) throw new Error(error.message);
 
-      const audioUrl = getAudioUrlFromSupabase(audioData?.path);
-
+      const audioUrl = await getAudioUrlFromSupabase(audioData?.path);
       console.log(audioUrl);
 
+      console.log("Sending request with audio URL:", audioUrl); // Debug log
+
       const response = await fetch(
-        "https://ai-podcast-fastapi-backend-production.up.railway.app/",
+        "https://ai-podcast-fastapi-backend.vercel.app/",
         {
           method: "POST",
           headers: {
@@ -48,6 +52,14 @@ const UploadForm = ({ isAllowed, message }: UploadFormProps) => {
           }),
         },
       );
+
+      // Add error handling for non-200 responses
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Server response:", response.status, errorText);
+        throw new Error(`Server error: ${response.status} - ${errorText}`);
+      }
+
       const data: SummaryData = await response.json();
       const storedData = await storeSummary(data);
       if (storedData[0].id) {
@@ -55,6 +67,10 @@ const UploadForm = ({ isAllowed, message }: UploadFormProps) => {
       }
     } catch (err) {
       console.error("Error in handleUpload:", err);
+      // Show error to user
+      alert(
+        `Upload failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+      );
     } finally {
       setLoading(false);
       setFile(null);
