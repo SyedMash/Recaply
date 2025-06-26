@@ -66,7 +66,10 @@ export const saveAudio = async (file: File) => {
   const supabase = await supabaseClient;
   const { data, error } = await supabase.storage
     .from("audiofiles")
-    .upload(file.name, file);
+    .upload(file.name, file, {
+      cacheControl: "3600",
+      upsert: true,
+    });
 
   if (error) throw new Error(error.message);
   const { data: urlData } = supabase.storage

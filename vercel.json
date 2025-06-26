@@ -1,0 +1,12 @@
+{
+  "functions": {
+    "pages/api/create-summary.js": {
+      "maxDuration": 60
+    }
+  },
+  "api": {
+    "bodyParser": {
+      "sizeLimit": "50mb"
+    }
+  }
+}
