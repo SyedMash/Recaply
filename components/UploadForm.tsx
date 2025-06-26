@@ -4,8 +4,9 @@ import React, { useState } from "react";
 import { GoUpload } from "react-icons/go";
 import { Button } from "@/components/ui/button";
 import { SummaryData } from "@/type";
-import { saveAudio, storeSummary } from "@/lib/actions/summary.action";
+import { getUrl, getUrl, storeSummary } from "@/lib/actions/summary.action";
 import { useRouter } from "next/navigation";
+import { supabaseClient } from "@/lib/supabase";
 
 interface UploadFormProps {
   isAllowed: boolean;
@@ -21,25 +22,25 @@ const UploadForm = ({ isAllowed, message }: UploadFormProps) => {
     if (!file) return;
     setLoading(true);
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const audioUrl = await saveAudio(file);
-      console.log(audioUrl);
+      const supabase = await supabaseClient;
+      const { data } = await supabase.storage
+        .from("audiofiles")
+        .upload(file.name, file, {
+          cacheControl: "3600",
+          upsert: true,
+        });
 
-      const response = await fetch(
-        "http://127.0.0.1:8000/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            audio_url: audioUrl,
-          }),
+      const audioUrl = await getUrl(data?.path);
+      const response = await fetch("http://127.0.0.1:8000/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          audio_url: audioUrl,
+        }),
+      });
       const data: SummaryData = await response.json();
       const storedData = await storeSummary(data);
       if (storedData[0].id) {
