@@ -29,7 +29,7 @@ const UploadForm = ({ isAllowed, message }: UploadFormProps) => {
       console.log(audioUrl);
 
       const response = await fetch(
-        "https://ai-podcast-fastapi-backend-production.up.railway.app/",
+        "http://127.0.0.1:8000/",
         {
           method: "POST",
           headers: {
