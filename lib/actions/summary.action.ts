@@ -62,10 +62,16 @@ export const checkSummaryPermission = async () => {
   }
 };
 
-export const getUrl = async (filePath: string) => {
-  const { data } = await supabaseClient.storage
+export const saveAudio = async (file: File) => {
+  const supabase = await supabaseClient;
+  const { data, error } = await supabase.storage
     .from("audiofiles")
-    .getPublicUrl(filePath);
+    .upload(file.name, file);
 
-  return data.publicUrl;
+  if (error) throw new Error(error.message);
+  const { data: urlData } = supabase.storage
+    .from("audiofiles")
+    .getPublicUrl(data?.path);
+
+  return urlData.publicUrl;
 };
