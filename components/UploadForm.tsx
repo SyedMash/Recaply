@@ -4,8 +4,13 @@ import React, { useState } from "react";
 import { GoUpload } from "react-icons/go";
 import { Button } from "@/components/ui/button";
 import { SummaryData } from "@/type";
-import { saveAudio, storeSummary } from "@/lib/actions/summary.action";
+import {
+  getAudioUrlFromSupabase,
+  saveAudio,
+  storeSummary,
+} from "@/lib/actions/summary.action";
 import { useRouter } from "next/navigation";
+import { supabaseClient } from "@/lib/supabase";
 
 interface UploadFormProps {
   isAllowed: boolean;
@@ -22,7 +27,14 @@ const UploadForm = ({ isAllowed, message }: UploadFormProps) => {
     setLoading(true);
 
     try {
-      const audioUrl = await saveAudio(file);
+      const supabase = await supabaseClient;
+      const { data: audioData, error } = await supabase.storage
+        .from("audiofiles")
+        .upload(file.name, file);
+      if (error) throw new Error(error.message);
+
+      const audioUrl = getAudioUrlFromSupabase(audioData?.path);
+
       console.log(audioUrl);
 
       const response = await fetch("http://127.0.0.1:8000/", {
