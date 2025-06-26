@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { SummaryData } from "@/type";
 import {
   getAudioUrlFromSupabase,
-  saveAudio,
   storeSummary,
 } from "@/lib/actions/summary.action";
 import { useRouter } from "next/navigation";
@@ -37,15 +36,18 @@ const UploadForm = ({ isAllowed, message }: UploadFormProps) => {
 
       console.log(audioUrl);
 
-      const response = await fetch("http://127.0.0.1:8000/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        "https://ai-podcast-fastapi-backend-production.up.railway.app/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            audio_url: audioUrl,
+          }),
         },
-        body: JSON.stringify({
-          audio_url: audioUrl,
-        }),
-      });
+      );
       const data: SummaryData = await response.json();
       const storedData = await storeSummary(data);
       if (storedData[0].id) {
